@@ -1,0 +1,16 @@
+"0","library(tidyverse)"
+"0","library(haven)"
+"0","library(here)"
+"0","library(sjlabelled)"
+"0","library(kableExtra)"
+"2","
+Attaching package: ‘kableExtra’
+
+"
+"2","The following object is masked from ‘package:dplyr’:
+
+    group_rows
+
+"
+"0","library(gridExtra)"
+"0","library(ggpubr)"

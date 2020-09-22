@@ -1,0 +1,26 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1600813479335.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2508743148",
+    "id" : "1D4FE24C",
+    "lastKnownWriteTime" : 1600810503,
+    "last_content_update" : 1600810503,
+    "path" : "D:/Dudu/Pesquisa/Bolsonaro - Discursos e Atitudes Populistas/Scripts/04 - EFA.R",
+    "project_path" : "04 - EFA.R",
+    "properties" : {
+        "cursorPosition" : "106,61",
+        "scrollLine" : "82",
+        "tempName" : "Untitled1"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

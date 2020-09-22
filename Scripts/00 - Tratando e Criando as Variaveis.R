@@ -468,3 +468,36 @@ e19 <- e19 %>%
   mutate(pop_ed_sart = as.factor(pop_ed_sart))
 
 
+###
+# Abordagem Goertziana (Minimo)
+e19 <- e19 %>%
+  rowwise() %>%
+  mutate(pop_gz = min(c(M1, AE1, PC1))) %>%
+  ungroup()
+
+
+###
+# Additive Approach
+  # Using Normalized variables and Normalizing the Composite Variable
+e19 <- e19 %>%
+  mutate(pop_ad = M1_n + AE1_n + PC1_n) %>%
+  mutate(pop_ad_n = round(range01(pop_ad),2)) %>%
+  mutate(pop_ad_n = as.numeric(pop_ad_n))
+
+
+###
+# Filtrando apenas os eleitores que se autolocalização na direita:
+  # Escala de autolocalização: 1-5-10
+    # Direita: A partir do meio - 6 > 10;
+
+e19_dir <- e19 %>%
+  filter(q18 > 5) %>%
+  mutate(ideo = case_when(
+    q18 == 95 ~ as.numeric(NA),
+    q18 == 97 ~ as.numeric(NA),
+    q18 == 98 ~ as.numeric(NA),
+    TRUE ~ as.numeric(q18)
+  ))
+
+
+

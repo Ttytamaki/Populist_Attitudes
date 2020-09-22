@@ -1,0 +1,9 @@
+"0","source(here::here(""00 - Tratando e Criando as Variaveis.R""), encoding = ""UTF-8"")"
+"0","source(here::here(""01 - Distribuicao das Variaveis.R""), encoding = ""UTF-8"")"
+"2","Erro: Problem with `mutate()` input `..1`.
+[31mx[39m Input `..1` can't be recycled to size 1.
+[34mi[39m Input `..1` is `i4[i]`.
+[34mi[39m Input `..1` must be size 1, not 2506.
+[34mi[39m Did you mean: `..1 = list(i4[i])` ?
+[34mi[39m The error occurred in row 1.
+"
