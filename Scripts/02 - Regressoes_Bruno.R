@@ -217,6 +217,173 @@ texreg(l = models,
 
 
 
+# NEW MODELS OCT 15;
+
+# Dimensoes separadas:
+m1 <- glm(voto_b ~ M1 + ideo + sexo + id + ed + fx_renda, 
+          data = e19,
+          na.action = na.omit,
+          family = binomial(link = "logit"))
+summary(m1)
+
+m2 <- glm(voto_b ~ AE1 + ideo + sexo + id + fx_renda+ ed, 
+          data = e19,
+          na.action = na.omit,
+          family = binomial(link = "logit"))
+summary(m2)
+
+m3 <- glm(voto_b ~  PC1 + ideo + sexo + id + ed + fx_renda, 
+          data = e19,
+          na.action = na.omit,
+          family = binomial(link = "logit"))
+summary(m3)
+
+m4 <- glm(voto_b ~ M1*ideo + sexo + id + ed + fx_renda, 
+          data = e19,
+          na.action = na.omit,
+          family = binomial(link = "logit"))
+summary(m4)
+
+m5 <- glm(voto_b ~ AE1*ideo + sexo + id + fx_renda+ ed, 
+          data = e19,
+          na.action = na.omit,
+          family = binomial(link = "logit"))
+summary(m5)
+
+m6 <- glm(voto_b ~  PC1*ideo + sexo + id + ed + fx_renda, 
+          data = e19,
+          na.action = na.omit,
+          family = binomial(link = "logit"))
+summary(m6)
+
+### Texreg it:
+models <- list(m1,m2,m3,m4,m5,m6)
+
+## export table: (copy + paste the R output to Overleaf)
+texreg(l = models,
+       custom.coef.names = c('Intercept','Manichaean','Left-right ideology','Male','Age','Education','Income',
+                             'Antielitism','People-centrism',
+                             'Manich * Ideology','Antiel * Ideology', 'People-cent. * Ideology'),
+       include.deviance = F, include.loglik = F, booktabs = T, leading.zero = F, 
+       single.row = F, caption = 'Logistic Regression Models Predicting of Voting for Jair Bolsonaro in 2018 by Sub-dimensions of Populism',
+       label = 'tab:reg:subdim', fontsize = 'small',
+       custom.model.names = paste(unlist(map(1:length(models), ~paste0('(',.x,')'))), sep= ','))
+
+
+
+
+### Other democracy questions:
+# p1003: Churchill q (recoded so higher nr mean more agreement w/ democracy being the best form)
+e19 <- e19 %>%
+  mutate(., p8.r = case_when(p8 >= 8 ~ NA_character_,
+                             p8 == 1 ~ 'Dem always better',
+                             p8 == 2 ~ 'Dict better dem sometimes',
+                             p8 == 3 ~ 'A. Indif'),
+         p1003.r = case_when(as.numeric(p1003) >= 8 ~ NA_real_,
+                             T ~ 6 - as.numeric(p1003)))
+
+m1 <- glm(voto_b ~ pop_add + ideo + sexo + id + ed +  fx_renda + PC2 + antipt + relig, 
+          data = e19,
+          na.action = na.omit,
+          family = binomial(link = "logit"))
+summary(m1)
+
+m2 <- glm(voto_b ~ pop_add + ideo + sexo + id + ed + p1003.r + fx_renda + antipt + relig, 
+          data = e19,
+          na.action = na.omit,
+          family = binomial(link = "logit"))
+summary(m2)
+
+
+m3 <- glm(voto_b ~ pop_add + ideo + sexo + id + ed +p1004.r + fx_renda + antipt + relig, 
+          data = e19,
+          na.action = na.omit,
+          family = binomial(link = "logit"))
+summary(m3)
+
+e19 <- mutate(e19, p1004.r = case_when(as.numeric(p1004) > 5 ~ NA_real_,
+                                       T ~ as.numeric(p1004)))
+
+m4 <- glm(voto_b ~ pop_add + ideo + sexo + id + ed + PC2 + p1004.r + p1003.r + fx_renda + antipt + relig, 
+          data = e19,
+          na.action = na.omit,
+          family = binomial(link = "logit"))
+summary(m4)
+
+models <- list(m1, m2, m3, m4)
+
+## texreg:
+texreg(l = models,
+       custom.coef.names = c('Intercept','Populism (add)','Left-right ideology','Male','Age','Education','Income',
+                             'Illiberalism',
+                             'Anti-PT','Evangelical','Churchill Democracy','Anti-minority'),
+       include.deviance = F, include.loglik = F, booktabs = T, leading.zero = F, 
+       single.row = F, caption = 'Logistic Regression Models Predicting of Voting for Jair Bolsonaro in 2018 including Illiberal Attitudes',
+       label = 'tab:reg2', fontsize = 'small',
+       custom.model.names = paste(unlist(map(1:length(models), ~paste0('(',.x,')'))), sep= ','))
+
+
+
+## p1004: economic problems should be solved before dealing with minorities (blacks, women,...)
+
+# PC2 = highlander; p1004 no effect; p8 (dict better than democracy sometimes) has effect; Churchill (p1003) has effect;
+
+e19 <- e19 %>%
+  mutate(pop_3c = case_when(
+    pop == 0.421875 ~ as.numeric(1),
+    pop == 0.5625 ~ as.numeric(1),
+    pop == 0.75 ~ as.numeric(1),
+    pop == 1 ~ as.numeric(2),
+    pop >= 0 & pop <= 0.375 ~ as.numeric(0),
+    pop == 0.5 ~ as.numeric(0),
+    TRUE ~ as.numeric(NA)
+  )) %>%
+  mutate(pop_3c = as.factor(pop_3c))
+
+e19 <- e19 %>%
+  mutate(pop_3cat = case_when(do.call(pmin, select(., AE1_n, PC1_n, M1_n)) == 1 ~ 2,
+                                   do.call(pmin, select(., AE1_n, PC1_n, M1_n)) >= 0.75 ~ 1,
+                                   T ~ 0),
+         pop_3cat = as.factor(pop_3cat))
+
+m9 <- glm(voto_b ~ pop_3cat * ideo2.2  + sexo + id + ed +  fx_renda  + relig + antipt, 
+          data = e19,
+          na.action = na.omit,
+          family = binomial(link = "logit"))
+summary(m9)
+
+plot_model(m9, type = 'int')
+
+## Goertz:
+e19 <- e19 %>%
+  mutate(., pop_goertz = do.call(pmin, select(.,AE1, PC1, M1)))
+
+m9 <- glm(voto_b ~ pop_goertz * ideo  + sexo + id + ed + PC2 + corrup1 +  fx_renda + antipt + relig, 
+          data = e19,
+          na.action = na.omit,
+          family = binomial(link = "logit"))
+summary(m9)
+
+plot_model(m9, type = 'int')
+
+cor(select(e19, pop_goertz, M1, PC1, AE1), use = 'pairwise')
+
+
+
+
+### Quem sao os antidemocratas:
+
+e19 %>% group_by(p8.r) %>%
+  summarise(renda = mean(fx_renda, na.rm=T),
+            sexo = mean(sexo, na.rm=T),
+            id = median(id, na.rm=T),
+            ideo = mean(ideo, na.rm=T),
+            count = n(),
+            educ = mean(ed, na.rm=T))
+
+## Demographics don't vary much - only thing is mean ideology higher for ppl who say dictatorship is sometimes better;
+
+
 ## Results on the subsample:
 m1 <- glm(voto_b ~ pop_2c + sexo + id + ed + fx_renda, 
           data = subset(e19, ideo >= 6),
