@@ -134,11 +134,30 @@ m4 <- glm(voto_b ~ pop_add + sexo + id + ed+ fx_renda,
           na.action = na.omit,
           family = binomial(link = "logit"))
 
-m5 <- glm(voto_b ~ ideo * pop_add + sexo + id + ed + fx_renda,   
+m5 <- glm(voto_b ~ pop_add * ideo + sexo + id + ed + fx_renda,   
           data = e19,
           na.action = na.omit,
           family = binomial(link = "logit"))
 summary(m5)
+
+
+###
+e19 <- e19 %>%
+  mutate(ideo3 = case_when(
+    ideo >= 9 ~ as.character(1),
+    ideo <= 2 ~ as.character(0),
+    is.na(ideo) ~ NA_character_,
+    T ~ '-1'
+  ))
+
+
+
+m6 <- glm(voto_b ~ pop_add*ideo3 + ideo + sexo + id + ed + corrup1 + PC2 + antipt, 
+          data = e19,
+          na.action = na.omit,
+          family = binomial(link = "logit"))
+summary(m6)
+plot_model(m6, type = 'int')
 
 
 models <- list(m1, m2, m3, m4, m5)
