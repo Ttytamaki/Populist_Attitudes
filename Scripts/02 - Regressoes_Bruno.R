@@ -13,6 +13,7 @@ library(ggrepel)
 library(tikzDevice)
 options(tikzDocumentDeclaration = "\\documentclass[12pt]{article}")
 library(gridExtra)
+library(sjPlot)
 
 # Eu particularmente nao acho que abrir toda a source com o script novo seja uma boa ideia. Pra esse projeto talvez nao tenha problema, mas assim que voce comecar a trabalhar com bases de dados maiores, ter tudo isso aberto no environment ao mesmo tempo vai travar ou deixar o R bem mais lento. Alem disso, nao tem necessidade abrir todo objeto que ja foi feito no projeto, sendo que a maioria vai ser inutil pra esse script.
 #source(here::here("00 - Tratando e Criando as Variaveis.R"), encoding = "UTF-8") 
@@ -134,7 +135,7 @@ m4 <- glm(voto_b ~ pop_add + sexo + id + ed+ fx_renda,
           na.action = na.omit,
           family = binomial(link = "logit"))
 
-m5 <- glm(voto_b ~ pop_add * ideo + sexo + id + ed + fx_renda,   
+m5 <- glm(voto_b ~ ideo * pop_add + sexo + id + ed + fx_renda,   
           data = e19,
           na.action = na.omit,
           family = binomial(link = "logit"))
@@ -152,7 +153,7 @@ e19 <- e19 %>%
 
 
 
-m6 <- glm(voto_b ~ pop_add*ideo3 + ideo + sexo + id + ed + corrup1 + PC2 + antipt, 
+m6 <- glm(voto_b ~ pop_add*ideo + ideo + sexo + id + ed + corrup1 + PC2 + antipt, 
           data = e19,
           na.action = na.omit,
           family = binomial(link = "logit"))
@@ -184,7 +185,7 @@ p1 <- plot_model(m3, type = 'int',color= 'bw') + theme_minimal() +
 
 p1
 
-p2 <- plot_model(m6, type = 'int',color= 'bw', mdrt.values = 'meansd') + theme_minimal() +
+p2 <- plot_model(m5, type = 'int',color= 'bw', mdrt.values = 'meansd') + theme_minimal() +
   ggtitle('Populism as continuous (Model 5)') + ylab('Predicted Probabilities of Voting Bolsonaro') + 
   xlab('Left (0) - Right (10) Ideology') + theme(legend.position = 'bottom') + 
   geom_density(data = e19[as.numeric(names(m3$fitted.values)),],
@@ -313,29 +314,30 @@ m2 <- glm(voto_b ~ pop_add + ideo + sexo + id + ed + p1003.r + fx_renda + antipt
           family = binomial(link = "logit"))
 summary(m2)
 
+#e19 <- mutate(e19, p1004.r = case_when(as.numeric(p1004) > 5 ~ NA_real_,
+                                   #    T ~ as.numeric(p1004)))
 
-m3 <- glm(voto_b ~ pop_add + ideo + sexo + id + ed +p1004.r + fx_renda + antipt + relig, 
-          data = e19,
-          na.action = na.omit,
-          family = binomial(link = "logit"))
-summary(m3)
 
-e19 <- mutate(e19, p1004.r = case_when(as.numeric(p1004) > 5 ~ NA_real_,
-                                       T ~ as.numeric(p1004)))
+#m3 <- glm(voto_b ~ pop_add + ideo + sexo + id + ed +p1004.r + fx_renda + antipt + relig, 
+#          data = e19,
+#          na.action = na.omit,
+#          family = binomial(link = "logit"))
+#summary(m3)
 
-m4 <- glm(voto_b ~ pop_add + ideo + sexo + id + ed + PC2 + p1004.r + p1003.r + fx_renda + antipt + relig, 
+
+m4 <- glm(voto_b ~ pop_add + ideo + sexo + id + ed + PC2 +  p1003.r + fx_renda + antipt + relig, 
           data = e19,
           na.action = na.omit,
           family = binomial(link = "logit"))
 summary(m4)
 
-models <- list(m1, m2, m3, m4)
+models <- list(m1, m2, m4)
 
 ## texreg:
 texreg(l = models,
        custom.coef.names = c('Intercept','Populism (add)','Left-right ideology','Male','Age','Education','Income',
                              'Illiberalism',
-                             'Anti-PT','Evangelical','Churchill Democracy','Anti-minority'),
+                             'Anti-PT','Evangelical','Churchill Democracy'),
        include.deviance = F, include.loglik = F, booktabs = T, leading.zero = F, 
        single.row = F, caption = 'Logistic Regression Models Predicting of Voting for Jair Bolsonaro in 2018 including Illiberal Attitudes',
        label = 'tab:reg2', fontsize = 'small',
@@ -373,9 +375,49 @@ summary(m9)
 
 plot_model(m9, type = 'int')
 
-## Goertz:
+### Appendix:
+
+## Table 3 w/ Goertz and with six items:
+
 e19 <- e19 %>%
-  mutate(., pop_goertz = do.call(pmin, select(.,AE1, PC1, M1)))
+  mutate(., pop_goertz = do.call(pmin, select(.,AE1, PC1, M1)),
+         pop_all = rowMeans(select(., M1, AE1, PC1), na.rm=T))
+
+m1 <- glm(voto_b ~ pop_goertz +  sexo + id + ed + fx_renda, 
+          data = e19,
+          na.action = na.omit,
+          family = binomial(link = "logit"))
+
+m3 <- glm(voto_b ~  ideo * pop_goertz + sexo + id + ed + fx_renda, 
+          data = e19,
+          na.action = na.omit,
+          family = binomial(link = "logit"))
+
+## Now with pop_all:
+m4 <- glm(voto_b ~ pop_all + sexo + id + ed+ fx_renda, 
+          data = e19,
+          na.action = na.omit,
+          family = binomial(link = "logit"))
+
+m5 <- glm(voto_b ~ ideo * pop_all + sexo + id + ed + fx_renda,   
+          data = e19,
+          na.action = na.omit,
+          family = binomial(link = "logit"))
+
+models <- list(m1, m3, m4, m5)
+
+## export table: (copy + paste the R output to Overleaf)
+texreg(l = models,
+       custom.coef.names = c('Intercept','Populism (Goertz)','Male','Age','Education','Income','Left-right ideology',
+                             'Populism (Goertz) * Ideology',  
+                             'Populism (all six items)','Populism (all six items) * Ideology'),
+       include.deviance = F, include.loglik = F, booktabs = T, leading.zero = F, 
+       single.row = F, caption = 'Logistic Regression Models Predicting of Voting for Jair Bolsonaro in 2018 -- Alternative operationalization of populist attitudes',
+       label = 'tab:app:reg1', fontsize = 'small',
+       custom.model.names = paste(unlist(map(1:length(models), ~paste0('(',.x,')'))), sep= ','))
+
+
+
 
 m9 <- glm(voto_b ~ pop_goertz * ideo  + sexo + id + ed + PC2 + corrup1 +  fx_renda + antipt + relig, 
           data = e19,
