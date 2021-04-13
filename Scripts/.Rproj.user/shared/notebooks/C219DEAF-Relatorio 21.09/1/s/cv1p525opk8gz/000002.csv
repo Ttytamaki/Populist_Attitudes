@@ -1,6 +1,0 @@
-"0","kable(gender, ""latex"", caption = ""Age Table"", booktabs = T) %>%"
-"0","  kable_styling(latex_options = c(""striped"", ""hold_position"")) %>%"
-"0","  kable_styling(font_size = 12)"
-"2","Error in kable(gender, ""latex"", caption = ""Age Table"", booktabs = T) : 
-  não foi possível encontrar a função ""kable""
-"
